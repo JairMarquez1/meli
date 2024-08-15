@@ -42,6 +42,41 @@
 
     <div class="container mt-4">
         <!-- Dashboard View -->
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Card para la información del usuario -->
+                <div class="col-12 dashboard-card">
+                    <h3>Información del Usuario</h3>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p><strong>Nickname:</strong> <span id="nickname"></span></p>
+                            <p><strong>ID de Usuario:</strong> <span id="userId"></span></p>
+                            <p><strong>Nombre:</strong> <span id="fullName"></span></p>
+                            <p><strong>CURP:</strong> <span id="curp"></span></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Email:</strong> <span id="email"></span></p>
+                            <p><strong>Teléfono:</strong> <span id="phone"></span></p>
+                            <p><strong>País:</strong> <span id="countryId"></span></p>
+                            <p><strong>Fecha de Registro:</strong> <span id="registrationDate"></span></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Reputación:</strong> <span id="reputation"></span></p>
+                            <p><strong>Experiencia como Vendedor:</strong> <span id="sellerExperience"></span></p>
+                            <p><strong>Perfil:</strong> <a href="#" id="profileLink" target="_blank">Ver Perfil</a></p>
+                            
+                        </div>
+                        <div class="col-md-3">
+                            <p><img id="userLogo" alt="Logo del Usuario" style="max-width: 100px; height: auto;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7Pk2J-GEwHS_0Sgst8o5ooF8dTMsQUKJXtoDGUmOX2uYS_j6r-vTMVQaNwNdrCYAelc0&usqp=CAU"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        
+
         <div id="dashboard" class="dashboard-card">
             <h2>Ordenes</h2>
             <p>Gestiona tus ventas y más desde aquí.</p>
@@ -107,6 +142,32 @@
                 localStorage.clear()
                 location.href = 'login.html'
             }
+
+            fetch('https://api.mercadolibre.com/users/me', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${storedAccessToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('nickname').textContent = data.nickname;
+                document.getElementById('userId').textContent = data.id;
+                document.getElementById('fullName').textContent = `${data.first_name} ${data.last_name}`;
+                document.getElementById('curp').textContent = data.identification.number;
+                document.getElementById('email').textContent = data.email;
+                document.getElementById('phone').textContent = data.phone.number ? `${data.phone.area_code} ${data.phone.number}` : 'No disponible';
+                document.getElementById('countryId').textContent = data.country_id;
+                document.getElementById('registrationDate').textContent = new Date(data.registration_date).toLocaleDateString();
+                document.getElementById('reputation').textContent = data.seller_reputation.level_id || 'Sin reputación';
+                document.getElementById('sellerExperience').textContent = data.seller_experience || 'No disponible';
+                document.getElementById('profileLink').href = data.permalink;
+                
+                if (data.logo) {
+                    document.getElementById('userLogo').src = data.logo;
+                }
+            })
+            .catch(error => console.error('Error:', error));
         })
 
         function logout() {
