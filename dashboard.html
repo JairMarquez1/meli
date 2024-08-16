@@ -143,6 +143,11 @@
                 location.href = 'login.html'
             }
 
+            loadProfile()
+        })
+
+        function loadProfile() {
+            const storedAccessToken = localStorage.getItem('access_token');
             fetch('https://api.mercadolibre.com/users/me', {
                 method: 'GET',
                 headers: {
@@ -167,8 +172,31 @@
                     document.getElementById('userLogo').src = data.logo;
                 }
             })
-            .catch(error => console.error('Error:', error));
-        })
+            .catch(error => {
+                console.error('Error:', error)
+                if (error.status !== 401) return
+                refreshToken()
+                loadProfile()
+            });
+        }
+
+        function refreshToken() {
+            const storedRefreshToken = localStorage.getItem('refresh_token');
+            fetch('https://localhost:50101/api/meli/refresh-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ refreshToken: storedRefreshToken })
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('access_token', data.access_token);
+            })
+            .catch(error => {
+                console.error('Error:', error)
+            });
+        }
 
         function logout() {
             localStorage.clear()
